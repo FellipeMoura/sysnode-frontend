@@ -1,13 +1,12 @@
 import { Environment } from '../axios-config/environment';
 import { Api } from '../axios-config';
-import autoLogout from './autoLogout';
 
 export interface IFuncionario {
   id: number;
   nome: string;
   telefone?: string | null | undefined;
   cpf?: string | null | undefined;
-  grupo?: number | null | undefined;
+  grupo?: string | null | undefined;
   login?: string | null | undefined;
   ativo?: number;
 }
@@ -36,9 +35,8 @@ const getAll = async (page = 1, filter = ''): Promise<TClientesComTotalCount | E
     }
 
     return new Error('Erro ao listar os registros.');
-  } catch (error) {
-    console.error(error);
-   return autoLogout(error)
+   } catch (error) {
+    return new Error('Erro ao criar o registro.');
   }
 };
 
@@ -52,8 +50,8 @@ const getById = async (id: number): Promise<IFuncionario | Error> => {
 
     return new Error('Erro ao consultar o registro.');
   } catch (error) {
-    console.error(error);
-    return autoLogout(error)
+ return new Error('Erro');
+   
   }
 };
 
@@ -68,27 +66,24 @@ const create = async (dados: Omit<IFuncionario, 'id'>): Promise<number | Error> 
     }
 
     return new Error('Erro ao criar o registro.');
-  } catch (error) {
-    console.error(error);
-   return autoLogout(error)
+   } catch (error) {
+    return new Error('Erro ao criar o registro.');
   }
 };
 
 const updateById = async (id: number, dados: Omit<IFuncionario, 'id' | 'empresa' >): Promise<void | Error> => {
   try {
     await Api.put(`/funcionarios/${id}`, dados);
-  } catch (error) {
-    console.error(error);
-   return autoLogout(error)
+   } catch (error) {
+    return new Error('Erro ao criar o registro.');
   }
 };
 
 const deleteById = async (id: number): Promise<void | Error> => {
   try {
     await Api.delete(`/funcionarios/${id}`);
-  } catch (error) {
-    console.error(error);
-   return autoLogout(error)
+   } catch (error) {
+    return new Error('Erro ao criar o registro.');
   }
 };
 

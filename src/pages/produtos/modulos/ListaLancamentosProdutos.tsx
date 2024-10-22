@@ -53,23 +53,6 @@ export const ListaLancamentos = (props: LancamentosProps) => {
     })
   }, [filter, page]);
 
-  const handleDelete = (id: number) => {
-    if (confirm('Realmente deseja apagar?')) {
-      LancamentosService.deleteById(id)
-        .then(result => {
-          if (result instanceof Error) {
-            alert(result.message);
-          } else {
-            setRows(oldRows => [
-              ...oldRows.filter(oldRow => oldRow.id !== id),
-            ]);
-            alert('Registro apagado com sucesso!');
-          }
-        });
-    }
-  };
-
-
   return (
 
 
@@ -97,9 +80,7 @@ export const ListaLancamentos = (props: LancamentosProps) => {
                   <IconButton size="small" onClick={() => navigate(`/lancamentos/detalhe/${item.id}`)}>
                     <Icon>assignment</Icon>
                   </IconButton>
-                  <IconButton size="small" onClick={() => handleDelete(item.id)}>
-                    <Icon>delete</Icon>
-                  </IconButton>
+                 
                 </TableCell>
                 <TableCell>{item.data}</TableCell>
                 <TableCell>{item.tipo}</TableCell>
@@ -112,14 +93,14 @@ export const ListaLancamentos = (props: LancamentosProps) => {
           <TableFooter>
             {isLoading && (
               <TableRow>
-                <TableCell colSpan={3}>
+                <TableCell colSpan={7}>
                   <LinearProgress variant='indeterminate' />
                 </TableCell>
               </TableRow>
             )}
             {(totalCount > 0 && totalCount > Environment.LIMITE_DE_LINHAS) && (
               <TableRow>
-                <TableCell colSpan={3}>
+                <TableCell colSpan={7}>
                   <Pagination
                     page={page}
                     count={Math.ceil(totalCount / Environment.LIMITE_DE_LINHAS)}

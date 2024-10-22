@@ -1,6 +1,5 @@
 import { Environment } from '../axios-config/environment';
 import { Api } from '../axios-config';
-import autoLogout from './autoLogout';
 
 export interface IProduto {
   id: number;
@@ -63,9 +62,8 @@ const getAll = async (page = 1, filter = ''): Promise<TProdutosComTotalCount | E
     }
 
     return new Error('Erro ao listar os registros.');
-  } catch (error) {
-    console.error(error);
-   return autoLogout(error)
+   } catch (error) {
+    return new Error('Erro ao criar o registro.');
   }
 };
 
@@ -84,9 +82,8 @@ const getAllServices = async (page = 1, filter = ''): Promise<TServicosComTotalC
     }
 
     return new Error('Erro ao listar os registros.');
-  } catch (error) {
-    console.error(error);
-   return autoLogout(error)
+   } catch (error) {
+    return new Error('Erro ao criar o registro.');
   }
 };
 const getById = async (id: number): Promise<IProduto | Error> => {
@@ -99,8 +96,8 @@ const getById = async (id: number): Promise<IProduto | Error> => {
 
     return new Error('Erro ao consultar o registro.');
   } catch (error) {
-    console.error(error);
-    return autoLogout(error)
+    return new Error('Erro ao consultar o registro.');
+   
   }
 };
 
@@ -115,25 +112,22 @@ const create = async (dados: Omit<IProduto, 'id' | 'empresa'>): Promise<number |
     }
 
     return new Error('Erro ao criar o registro.');
-  } catch (error) {
-    console.error(error);
-   return autoLogout(error)
+   } catch (error) {
+    return new Error('Erro ao criar o registro.');
   }
 };
 const updateById = async (id: number, dados: Omit<IProduto, 'id' | 'empresa' | 'tipo'>): Promise<void | Error> => {
   try {
     await Api.put(`/produtos/${id}`, dados);
-  } catch (error) {
-    console.error(error);
-   return autoLogout(error)
+   } catch (error) {
+    return new Error('Erro ao criar o registro.');
   }
 };
 const deleteById = async (id: number): Promise<void | Error> => {
   try {
     await Api.delete(`/produtos/${id}`);
-  } catch (error) {
-    console.error(error);
-   return autoLogout(error)
+   } catch (error) {
+    return new Error('Erro ao criar o registro.');
   }
 };
 
@@ -154,9 +148,8 @@ const getAllCategories = async (tipo = '', page = 1, filter = ''): Promise<TCate
     }
 
     return new Error('Erro ao listar os registros.');
-  } catch (error) {
-    console.error(error);
-   return autoLogout(error)
+   } catch (error) {
+    return new Error('Erro ao criar o registro.');
   }
 };
 const createCategory = async (dados: Omit<ICategorias, 'id' | 'empresa'>): Promise<number | Error> => {
@@ -170,9 +163,8 @@ const createCategory = async (dados: Omit<ICategorias, 'id' | 'empresa'>): Promi
     }
 
     return new Error('Erro ao criar o registro.');
-  } catch (error) {
-    console.error(error);
-   return autoLogout(error)
+   } catch (error) {
+    return new Error('Erro ao criar o registro.');
   }
 };
 
@@ -186,26 +178,25 @@ const getCategoryById = async (id: number): Promise<ICategorias | Error> => {
 
     return new Error('Erro ao consultar o registro.');
   } catch (error) {
-    console.error(error);
-    return autoLogout(error)
+
+    return new Error('Erro ao consultar o registro.');
+   
   }
 };
 
 const updateCategoryById = async (id: number, dados: Omit<ICategorias, 'id' | 'tipo' | 'empresa' | 'tipo'>): Promise<void | Error> => {
   try {
     await Api.put(`/categorias/${id}`, dados);
-  } catch (error) {
-    console.error(error);
-   return autoLogout(error)
+   } catch (error) {
+    return new Error('Erro ao criar o registro.');
   }
 };
 
 const deleteCategoryById = async (id: number): Promise<void | Error> => {
   try {
     await Api.delete(`/categorias/${id}`);
-  } catch (error) {
-    console.error(error);
-   return autoLogout(error)
+   } catch (error) {
+    return new Error('Erro ao criar o registro.');
   }
 };
 

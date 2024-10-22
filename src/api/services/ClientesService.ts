@@ -1,6 +1,6 @@
 import { Environment } from '../axios-config/environment';
 import { Api } from '../axios-config';
-import autoLogout from './autoLogout';
+
 export interface ICliente {
   id: number;
   nome: string;
@@ -32,9 +32,8 @@ const getAll = async (page = 1, filter = ''): Promise<TClientesComTotalCount | E
     }
 
     return new Error('Erro ao listar os registros.');
-  } catch (error) {
-    console.error(error);
-   return autoLogout(error)
+   } catch (error) {
+    return new Error('Erro ao criar o registro.');
   }
 };
 
@@ -48,8 +47,8 @@ const getById = async (id: number): Promise<ICliente | Error> => {
 
     return new Error('Erro ao consultar o registro.');
   } catch (error) {
-    console.error(error);
-    return autoLogout(error)
+    return new Error('Erro ao consultar o registro.');
+   
   }
 };
 
@@ -64,27 +63,24 @@ const create = async (dados: Omit<ICliente, 'id' | 'empresa' | 'usuario'>): Prom
     }
 
     return new Error('Erro ao criar o registro.');
-  } catch (error) {
-    console.error(error);
-   return autoLogout(error)
+   } catch (error) {
+    return new Error('Erro ao criar o registro.');
   }
 };
 
 const updateById = async (id: number, dados: Omit<ICliente, 'id' | 'empresa' | 'usuario'>): Promise<void | Error> => {
   try {
     await Api.put(`/clientes/${id}`, dados);
-  } catch (error) {
-    console.error(error);
-   return autoLogout(error)
+   } catch (error) {
+    return new Error('Erro ao criar o registro.');
   }
 };
 
 const deleteById = async (id: number): Promise<void | Error> => {
   try {
     await Api.delete(`/clientes/${id}`);
-  } catch (error) {
-    console.error(error);
-   return autoLogout(error)
+   } catch (error) {
+    return new Error('Erro ao criar o registro.');
   }
 };
 

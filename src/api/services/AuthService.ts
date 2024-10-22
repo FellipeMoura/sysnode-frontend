@@ -72,7 +72,7 @@ const getById = async (login: string): Promise<IListagemUsuario | Error> => {
 
     return new Error('Erro ao consultar o registro.');
   } catch (error) {
-    console.error(error);
+ return new Error('Erro');
     return new Error((error as { message: string }).message || 'Erro ao consultar o registro.');
   }
 };

@@ -10,8 +10,6 @@ import { FerramentasDaListagem } from '../../../components';
 import { VTable } from '../../../components/grids/VTable';
 import { toCash, toDate } from '../../../shared/functions';
 
-
-
 export const ListaLancamentos = () => {
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -92,7 +90,7 @@ export const ListaLancamentos = () => {
         <TableFooter>
           {isLoading && (
             <TableRow>
-              <TableCell colSpan={3}>
+              <TableCell colSpan={6}>
                 <LinearProgress variant='indeterminate' />
               </TableCell>
             </TableRow>
@@ -130,6 +128,7 @@ export const Row: React.FC<IRowProps> = ({ row }) => {
   const [totalCount, setTotalCount] = useState(0);
 
   useEffect(() => {
+
     if (open && !subRows.length) {
       setIsLoading(true);
 
@@ -183,8 +182,8 @@ export const Row: React.FC<IRowProps> = ({ row }) => {
 
         <TableCell>
 
-          <Box display='flex' alignItems={'center'} sx={{ color: row.id_cliente ? '#0EA925' : '#781B01' }}>
-           <Box sx={{color: row.pagamento? '' : '#777'}}>{toCash(row.valor_itens)}</Box>
+          <Box display='flex' alignItems={'center'} sx={{ color: row.id_cliente ? '#0EA925' : '#6208EB' }}>
+           <Box sx={{color: row.pago? '' : '#777'}}>{toCash(row.valor_itens)}</Box>
             
             {row.id_cliente ?
               <Icon > arrow_drop_up </Icon>
@@ -226,14 +225,14 @@ export const Row: React.FC<IRowProps> = ({ row }) => {
                 <TableFooter>
                   {isLoading && (
                     <TableRow>
-                      <TableCell colSpan={4}>
+                      <TableCell colSpan={5}>
                         <LinearProgress variant="indeterminate" />
                       </TableCell>
                     </TableRow>
                   )}
                   {(totalCount > 0 && totalCount > Environment.LIMITE_DE_LINHAS) && (
                     <TableRow>
-                      <TableCell colSpan={4}>
+                      <TableCell colSpan={5}>
                         <Pagination
                           page={page}
                           count={Math.ceil(totalCount / Environment.LIMITE_DE_LINHAS)}

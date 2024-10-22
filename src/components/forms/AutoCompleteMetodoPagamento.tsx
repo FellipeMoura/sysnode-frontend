@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { Autocomplete, TextField } from '@mui/material';
 import { useController, useFormContext } from 'react-hook-form';
+import { options_metodo } from '../../shared/template';
 
 interface IAutoCompleteMetodoPagamentoProps {
   isExternalLoading?: boolean;
@@ -10,24 +11,18 @@ export const AutoCompleteMetodoPagamento: React.FC<IAutoCompleteMetodoPagamentoP
   const { control } = useFormContext();
   
   const { field: { onChange, value }, fieldState: { error } } = useController({
-    name: 'metodo_pagamento',
+    name: 'metodo',
     control,
     defaultValue: undefined,
   });
 
-  const opcoes = [
-    { id: 'pix', label: 'Pix' },
-    { id: 'debito', label: 'Débito' },
-    { id: 'credito', label: 'Crédito' },
-    { id: 'dinheiro', label: 'Dinheiro' },
-    { id: 'boleto', label: 'Boleto' },
-  ];
+
 
   const autoCompleteSelectedOption = useMemo(() => {
     if (!value) return null;
-    const selectedOption = opcoes.find(opcao => opcao.id === value);
+    const selectedOption = options_metodo.find(opcao => opcao.id === value);
     return selectedOption || null;
-  }, [value, opcoes]);
+  }, [value, options_metodo]);
 
   return (
     <Autocomplete
@@ -35,8 +30,8 @@ export const AutoCompleteMetodoPagamento: React.FC<IAutoCompleteMetodoPagamentoP
       closeText='Fechar'
       noOptionsText='Sem opções'
       loadingText='Carregando...'
-      disablePortal
-      options={opcoes}
+      disablePortal={false}
+      options={options_metodo}
       disabled={isExternalLoading}
       value={autoCompleteSelectedOption}
       

@@ -1,6 +1,5 @@
 import { Environment } from '../axios-config/environment';
 import { Api } from '../axios-config';
-import autoLogout from './autoLogout';
 
 export interface IFornecedor {
   id: number;
@@ -39,8 +38,8 @@ const getAll = async (page = 1, filter = ''): Promise<TFornecedoresComTotalCount
 
     return new Error('Erro ao listar os registros.');
   } catch (error) {
-    console.error(error);
-    return autoLogout(error);
+    return new Error('Erro ao listar os registros.');
+   ;
   }
 };
 
@@ -55,8 +54,8 @@ const getById = async (id: number): Promise<IFornecedor | Error> => {
 
     return new Error('Erro ao consultar o registro.');
   } catch (error) {
-    console.error(error);
-    return autoLogout(error);
+    return new Error('Erro ao consultar o registro.');
+   ;
   }
 };
 
@@ -71,8 +70,8 @@ const create = async (dados: Omit<IFornecedor, 'id' | 'empresa' | 'usuario'>): P
 
     return new Error('Erro ao criar o registro.');
   } catch (error) {
-    console.error(error);
-    return autoLogout(error);
+    return new Error('Erro ao criar o registro.');
+   ;
   }
 };
 
@@ -81,8 +80,8 @@ const updateById = async (id: number, dados: Omit<IFornecedor, 'id' | 'empresa' 
   try {
     await Api.put(`/fornecedores/${id}`, dados);
   } catch (error) {
-    console.error(error);
-    return autoLogout(error);
+ return new Error('Erro');
+   ;
   }
 };
 
@@ -91,8 +90,8 @@ const deleteById = async (id: number): Promise<void | Error> => {
   try {
     await Api.delete(`/fornecedores/${id}`);
   } catch (error) {
-    console.error(error);
-    return autoLogout(error);
+ return new Error('Erro');
+   ;
   }
 };
 

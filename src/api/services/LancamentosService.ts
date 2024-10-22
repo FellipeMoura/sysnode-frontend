@@ -1,6 +1,5 @@
 import { Environment } from '../axios-config/environment';
 import { Api } from '../axios-config';
-import autoLogout from './autoLogout';
 
 export interface ILancamento {
   id: number;
@@ -9,7 +8,7 @@ export interface ILancamento {
   valor_base?: number | null | undefined;
   valor: number;
   qnt: number;
-
+  data?: string;
 }
 
 export interface ILancamentoConsulta extends ILancamento {
@@ -26,9 +25,9 @@ type TLancamentosComTotalCount = {
 
 export interface IVenda {
   id: number;
-  id_cliente?: number | null ;
-  id_fornecedor?: number | null ;
-  id_funcionario?: number | null ;
+  id_cliente?: number | null;
+  id_fornecedor?: number | null;
+  id_funcionario?: number | null;
   data: string;
   pagamento: number;
   empresa: number;
@@ -36,12 +35,13 @@ export interface IVenda {
 
 export interface IVendaConsulta extends IVenda {
   nome_agente: string;
+  pago: boolean;
   nome_funcionario: string | null | undefined;
   telefone: string | null | undefined;
   valor_base_itens: number;
   valor_itens: number;
   qnt_itens: number;
- 
+
 }
 
 export interface IVendaPaginado {
@@ -56,7 +56,7 @@ const getAll = async (type = '', id: number, page = 1, filter = ''): Promise<TLa
     const { data, headers } = await Api.get(urlRelativa);
 
     if (data) {
-      
+
       return {
         data,
         totalCount: Number(headers['x-total-count'] || Environment.LIMITE_DE_LINHAS),
@@ -65,8 +65,8 @@ const getAll = async (type = '', id: number, page = 1, filter = ''): Promise<TLa
 
     return new Error('Erro ao listar os registros.');
   } catch (error) {
-    console.error(error);
-   return autoLogout(error)
+ return new Error('Erro');
+   
   }
 };
 
@@ -80,8 +80,8 @@ const getById = async (id: number): Promise<ILancamento | Error> => {
 
     return new Error('Erro ao consultar o registro.');
   } catch (error) {
-    console.error(error);
-    return autoLogout(error)
+ return new Error('Erro');
+   
   }
 };
 
@@ -94,14 +94,14 @@ const create = async (dados: Omit<ILancamento, 'id' | 'usuario' | 'empresa'>): P
     const { data } = await Api.post<ILancamento>('/lancamentos', dados);
 
     if (data) {
-      
+
       return data.id;
     }
 
     return new Error('Erro ao criar o registro.');
   } catch (error) {
-    console.error(error);
-   return autoLogout(error)
+ return new Error('Erro');
+   
   }
 };
 
@@ -109,19 +109,19 @@ const deleteById = async (tabela: string, id: number): Promise<void | Error> => 
   try {
     await Api.delete(`/${tabela}/${id}`);
   } catch (error) {
-    console.error(error);
-   return autoLogout(error)
+ return new Error('Erro');
+   
   }
 };
 
-const getAllVendas = async ( page = 1, filter = ''): Promise<IVendaPaginado | Error> => {
+const getAllVendas = async (page = 1, filter = ''): Promise<IVendaPaginado | Error> => {
   try {
     const urlRelativa = `/vendas?page=${page}&limit=${Environment.LIMITE_DE_LINHAS}&filter=${filter}`;
 
     const { data, headers } = await Api.get(urlRelativa);
 
     if (data) {
-      
+
       return {
         data,
         totalCount: Number(headers['x-total-count'] || Environment.LIMITE_DE_LINHAS),
@@ -130,8 +130,8 @@ const getAllVendas = async ( page = 1, filter = ''): Promise<IVendaPaginado | Er
 
     return new Error('Erro ao listar os registros.');
   } catch (error) {
-    console.error(error);
-   return autoLogout(error)
+ return new Error('Erro');
+   
   }
 };
 
@@ -146,8 +146,8 @@ const getVendaById = async (id: number): Promise<IVendaConsulta | Error> => {
 
     return new Error('Erro ao consultar o registro.');
   } catch (error) {
-    console.error(error);
-    return autoLogout(error)
+ return new Error('Erro');
+   
   }
 };
 
@@ -157,14 +157,14 @@ const createVenda = async (dados: Omit<IVenda, 'id' | 'pagamento' | 'empresa'>):
     const { data } = await Api.post<IVenda>('/vendas', dados);
 
     if (data) {
-      
+
       return data.id;
     }
 
     return new Error('Erro ao criar o registro.');
   } catch (error) {
-    console.error(error);
-   return autoLogout(error)
+ return new Error('Erro');
+   
   }
 };
 

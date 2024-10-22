@@ -9,6 +9,7 @@ import { VTextField, VForm, useVForm, VSelect } from '../../../components/forms'
 import { FerramentasDeDetalhe } from '../../../components';
 import { LayoutComponentePagina } from '../../../layouts';
 import { ProdutosService } from '../../../api/services/ProdutosService';
+import { useSnackbar } from '../../../contexts/SnackBarProvider';
 
 
 
@@ -25,6 +26,7 @@ interface Props {
 }
 
 export const EditarCategoria = ({ id }: Props) => {
+  const { showSnackbarMessage } = useSnackbar();
   const { save,  ...methods } = useVForm<IFormData>({
     resolver: yupResolver(formValidationSchema)
   });
@@ -59,11 +61,8 @@ export const EditarCategoria = ({ id }: Props) => {
         if (result instanceof Error) {
           alert(result.message);
         } else {
-        
-          if (1===2) {
-          
-            navigate('/produtos');
-          }
+        showSnackbarMessage('Categoria atualizada com sucesso!');
+         
         }
       });
   }
@@ -111,7 +110,7 @@ export const EditarCategoria = ({ id }: Props) => {
           }}
         >
 
-          <Grid container direction='column' padding={2} spacing={2}>
+          <Grid container sx={{flexDirection:'column'}} padding={2} spacing={2}>
 
             {isLoading &&
               <Grid item>

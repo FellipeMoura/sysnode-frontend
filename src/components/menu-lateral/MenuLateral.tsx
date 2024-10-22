@@ -32,10 +32,10 @@ const ListItemLink: React.FC<IListItemLinkProps> = ({ isDrawerExpanded, to, icon
     <Tooltip title={!isDrawerExpanded ? label : ''} placement="right" arrow>
 
       <ListItemButton selected={!!match} onClick={handleClick}>
-        <ListItemIcon>
+        <ListItemIcon sx={{ minWidth: '30px', mr: isDrawerExpanded ? 1 : 'auto' }}>
           <Icon>{icon}</Icon>
         </ListItemIcon>
-        <ListItemText primary={label} /> {/* Esconde o texto */}
+        <ListItemText primary={label}  sx={{visibility: isDrawerExpanded ? 'visible' : 'hidden'}}/> {/* Esconde o texto */}
       </ListItemButton>
     </Tooltip >
   );
@@ -67,14 +67,16 @@ const Category: React.FC<ICategoryProps> = ({ category, options, icon, isDrawerE
   return (
     <>
       <Tooltip title={!isDrawerExpanded ? category : ''} placement="right" arrow>
-        <ListItemButton  selected={!!match} onClick={handleToggle}>
-          <ListItemIcon>
-            <Icon>{icon}</Icon>
+        <ListItemButton selected={!!match} onClick={handleToggle}>
+          <ListItemIcon sx={{ minWidth: '30px', mr: isDrawerExpanded ? 1 : 'auto' }}>
+            <Icon >{icon}</Icon>
           </ListItemIcon>
 
           <ListItemText
             primary={category}
             sx={{
+
+
               visibility: isDrawerExpanded ? 'visible' : 'hidden', // Define se o texto está visível ou não
               minWidth: isDrawerExpanded ? 'auto' : 0, // Ajusta a largura mínima para evitar deslocamento
             }}
@@ -120,7 +122,7 @@ export const MenuLateral: React.FC<IMenuLateralProps> = ({ children }) => {
   const { logout } = useAuthContext();
 
   // Estado para controlar o hover
-  const [isDrawerExpanded, setIsDrawerExpanded] = useState(false);
+  const [isDrawerExpanded, setIsDrawerExpanded] = useState(true);
 
   const toggleDrawerExpanded = () => {
     setIsDrawerExpanded(!isDrawerExpanded);
@@ -156,32 +158,32 @@ export const MenuLateral: React.FC<IMenuLateralProps> = ({ children }) => {
             transition: 'all 0.2s ease-out',
           }}
         >
-           <Box overflow="hidden" position={isDrawerExpanded ? 'absolute' : 'static'} whiteSpace="nowrap">
-           
-              <ListItemButton
-                onClick={toggleDrawerExpanded}
-                sx={{ height: theme.spacing(5), width: theme.spacing(7), justifyContent: isDrawerExpanded ? 'initial' : 'center' }}
-              >
-                <ListItemIcon sx={{ minWidth: 0, mr: isDrawerExpanded ? 3 : 'auto', justifyContent: 'center' }}>
-                  <Icon >
-                    {isDrawerExpanded ? 'menu_open' : 'menu'}
-                  </Icon>
-                </ListItemIcon>
-               
-              </ListItemButton>
-           
+          <Box overflow="hidden" position={isDrawerExpanded ? 'absolute' : 'static'} whiteSpace="nowrap">
+
+            <ListItemButton
+              onClick={toggleDrawerExpanded}
+              sx={{ height: theme.spacing(5), width: theme.spacing(7), justifyContent: isDrawerExpanded ? 'initial' : 'center' }}
+            >
+              <ListItemIcon sx={{ minWidth: 0, mr: isDrawerExpanded ? 3 : 'auto', justifyContent: 'center' }}>
+                <Icon >
+                  {isDrawerExpanded ? 'menu_open' : 'menu'}
+                </Icon>
+              </ListItemIcon>
+
+            </ListItemButton>
+
           </Box>
-         
+
           {/* Avatar e Divider */}
           <Box width="100%" height={(isDrawerExpanded ? theme.spacing(17) : theme.spacing(12))} display="flex" flexDirection='column' alignItems="center" justifyContent="center">
-          
+
             <Avatar
               sx={{
                 height: (isDrawerExpanded ? theme.spacing(12) : theme.spacing(5)),
                 width: (isDrawerExpanded ? theme.spacing(12) : theme.spacing(5)),
                 transition: 'all 0.2s ease-out',
               }}
-              src="../../../logo7.png"
+              src="../../../logo1.png"
             />
           </Box>
 
@@ -239,6 +241,8 @@ export const MenuLateral: React.FC<IMenuLateralProps> = ({ children }) => {
       <Box height="100vh" sx={{ transition: 'all 0.2s ease-out' }} ml={0} marginLeft={smUp ? isDrawerExpanded ? theme.spacing(28) : theme.spacing(7) : 0}>
         {children}
       </Box>
+
+      
     </>
   );
 };

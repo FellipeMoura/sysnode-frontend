@@ -8,6 +8,7 @@ import { VTextField, VForm, useVForm } from '../../../components/forms';
 import { FerramentasDeDetalhe } from '../../../components';
 import { LayoutComponentePagina } from '../../../layouts';
 import { ClientesService } from '../../../api/services/ClientesService';
+import { useSnackbar } from '../../../contexts/SnackBarProvider';
 
 interface IFormData {
   nome: string;
@@ -33,6 +34,7 @@ const formValidationSchema = yup.object().shape({
 });
 
 export const CadastrarCliente = () => {
+  const { showSnackbarMessage } = useSnackbar();
   const { save,  ...methods } = useVForm<IFormData>({
     resolver: yupResolver(formValidationSchema)
   });
@@ -49,11 +51,9 @@ export const CadastrarCliente = () => {
         if (result instanceof Error) {
           alert(result.message);
         } else {
-          if (1===2) {
-            navigate('/clientes');
-          } else {
+          showSnackbarMessage('Cliente cadastrado com sucesso!');
             navigate(`/clientes/detalhe/${result}`);
-          }
+          
         }
       });
   };
@@ -81,7 +81,7 @@ export const CadastrarCliente = () => {
             gap: 1,
           }}
         >
-          <Grid container direction='column' padding={2} spacing={2}>
+          <Grid container sx={{flexDirection:'column'}} padding={2} spacing={2}>
             {isLoading &&
               <Grid item>
                 <LinearProgress variant='indeterminate' />

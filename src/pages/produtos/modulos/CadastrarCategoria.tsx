@@ -9,6 +9,7 @@ import { VTextField, VForm, useVForm, VSelect } from '../../../components/forms'
 import { FerramentasDeDetalhe } from '../../../components';
 import { LayoutComponentePagina } from '../../../layouts';
 import { ProdutosService } from '../../../api/services/ProdutosService';
+import { useSnackbar } from '../../../contexts/SnackBarProvider';
 
 interface IFormData {
     tipo: string;
@@ -22,7 +23,8 @@ const formValidationSchema = yup.object().shape({
 });
 
 export const CadastrarCategoria: React.FC = () => {
-    const { save,  ...methods } = useVForm<IFormData>({
+    const { showSnackbarMessage } = useSnackbar();
+    const { save, ...methods } = useVForm<IFormData>({
         resolver: yupResolver(formValidationSchema)
     });
     const { id = 'cadastrar' } = useParams<'id'>();
@@ -46,11 +48,9 @@ export const CadastrarCategoria: React.FC = () => {
                 if (result instanceof Error) {
                     alert(result.message);
                 } else {
-                    if (1===2) {
-                        navigate('/categorias');
-                    } else {
-                        navigate(`/categorias/detalhe/${result}`);
-                    }
+                    showSnackbarMessage('Categoria cadastrada com sucesso!');
+                    navigate(`/categorias/detalhe/${result}`);
+
                 }
             });
 
@@ -62,10 +62,10 @@ export const CadastrarCategoria: React.FC = () => {
                 <FerramentasDeDetalhe
                     mostrarBotaoNovo={false}
                     mostrarBotaoApagar={false}
-                 //   mostrarBotaoSalvarEFechar
+                    //   mostrarBotaoSalvarEFechar
 
                     aoClicarEmSalvar={() => save(handleSave)}
-                 //   aoClicarEmSalvarEFechar={() => saveAndClose(handleSave)}
+                    //   aoClicarEmSalvarEFechar={() => saveAndClose(handleSave)}
                     aoClicarEmVoltar={() => navigate('/produtos')}
                 />
             }
@@ -81,7 +81,7 @@ export const CadastrarCategoria: React.FC = () => {
                     }}
                 >
 
-                    <Grid container direction='column' padding={2} spacing={2}>
+                    <Grid container sx={{flexDirection:'column'}} padding={2} spacing={2}>
 
                         {isLoading &&
                             <Grid item>
@@ -95,7 +95,7 @@ export const CadastrarCategoria: React.FC = () => {
                                     fullWidth
                                     label='Tipo'
                                     name="tipo"
-                                    control={methods.control} 
+                                    control={methods.control}
                                 >
                                     <MenuItem value="produto">Produto</MenuItem>
                                     <MenuItem value="servico">Serviço</MenuItem>

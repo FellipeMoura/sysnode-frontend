@@ -1,14 +1,19 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Icon, IconButton, LinearProgress, Pagination, TableBody, TableCell, TableFooter, TableRow } from '@mui/material';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+
+import { FuncionariosService, IFuncionarioConsulta } from '../../../api/services/FuncionariosService';
+import { Environment } from '../../../api/axios-config/environment';
+import { useSnackbar } from '../../../contexts/SnackBarProvider';
 import { FerramentasDaListagem } from '../../../components';
 import { LayoutComponentePagina } from '../../../layouts';
-import { Environment } from '../../../api/axios-config/environment';
-import { FuncionariosService, IFuncionarioConsulta } from '../../../api/services/FuncionariosService';
 import { useDebounce } from '../../../shared/UseDebounce';
 import { VTable } from '../../../components/grids/VTable';
 
+
 export const ListaFuncionarios: React.FC = () => {
+  const { showSnackbarMessage } = useSnackbar();
+
   const [searchParams, setSearchParams] = useSearchParams();
 
   const navigate = useNavigate();
@@ -57,7 +62,7 @@ export const ListaFuncionarios: React.FC = () => {
             setRows(oldRows => [
               ...oldRows.filter(oldRow => oldRow.id !== id),
             ]);
-            alert('Registro apagado com sucesso!');
+            showSnackbarMessage('Registro apagado com sucesso!');
           }
         });
     }
@@ -100,7 +105,7 @@ export const ListaFuncionarios: React.FC = () => {
           <TableFooter>
             {isLoading && (
               <TableRow>
-                <TableCell colSpan={3}>
+                <TableCell colSpan={4}>
                   <LinearProgress variant='indeterminate' />
                 </TableCell>
               </TableRow>

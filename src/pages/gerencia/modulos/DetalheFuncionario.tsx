@@ -1,15 +1,17 @@
 import { useEffect, useState } from 'react';
-import { LinearProgress, Paper, Typography } from '@mui/material';
+import { LinearProgress, MenuItem, Paper, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import { useNavigate } from 'react-router-dom';
 import * as yup from 'yup';
 
-import { VTextField, VForm, useVForm } from '../../../components/forms';
+import { VTextField, VForm, useVForm, VSelect } from '../../../components/forms';
 import { FerramentasDeDetalhe } from '../../../components';
 import { LayoutComponentePagina } from '../../../layouts';
 import { FuncionariosService } from '../../../api/services/FuncionariosService';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { VSwitch } from '../../../components/forms/VSwitch';
+import { options_grupo } from '../../../shared/template';
+import { useSnackbar } from '../../../contexts/SnackBarProvider';
 
 
 interface IFormData {
@@ -17,7 +19,7 @@ interface IFormData {
   nome: string;
   telefone?: string | null | undefined;
   cpf?: string | null | undefined;
-  grupo?: number | null | undefined;
+  grupo?: string | null | undefined;
   login?: string | null | undefined;
   ativo?: number;
 
@@ -34,7 +36,7 @@ const formValidationSchemaCreate = yup.object().shape({
     .transform(value => value === '' ? null : value)
     .matches(/^\d{11}$/, 'CPF inválido')
     .nullable(),
-  grupo: yup.number().nullable(),
+  grupo: yup.string().nullable(),
 });
 
 const formValidationSchemaUpdate = yup.object().shape({
@@ -48,7 +50,7 @@ const formValidationSchemaUpdate = yup.object().shape({
     .transform(value => value === '' ? null : value)
     .matches(/^\d{11}$/, 'CPF inválido')
     .nullable(),
-  grupo: yup.number().nullable(),
+  grupo: yup.string().nullable(),
   ativo: yup.number().optional(),
 });
 
@@ -57,7 +59,8 @@ interface Props {
 }
 
 export const DetalheFuncionario = ({ id }: Props) => {
-  const { save,  ...methods } = useVForm<IFormData>({
+  const { showSnackbarMessage } = useSnackbar();
+  const { save, ...methods } = useVForm<IFormData>({
     resolver: yupResolver(id !== 'cadastrar' ? formValidationSchemaUpdate : formValidationSchemaCreate),
   });
   const navigate = useNavigate();
@@ -80,7 +83,7 @@ export const DetalheFuncionario = ({ id }: Props) => {
             methods.setValue('telefone', result.telefone ?? '');
             methods.setValue('login', result.login ?? '');
             methods.setValue('cpf', result.cpf ?? '');
-            methods.setValue('grupo', result.grupo ?? 2);
+            methods.setValue('grupo', result.grupo ?? '');
             methods.setValue('ativo', result.ativo);
           }
         });
@@ -90,7 +93,7 @@ export const DetalheFuncionario = ({ id }: Props) => {
       methods.setValue('telefone', '');
       methods.setValue('login', '');
       methods.setValue('cpf', '');
-      methods.setValue('grupo', 2);
+      methods.setValue('grupo', '');
     }
   }, [id]);
 
@@ -106,11 +109,8 @@ export const DetalheFuncionario = ({ id }: Props) => {
           if (result instanceof Error) {
             alert(result.message);
           } else {
-            if (1===2) {
-              navigate('/colaboradores');
-            } else {
-              navigate(`/colaboradores/detalhe/${result}`);
-            }
+            showSnackbarMessage('Cadastro realizado com sucesso!');
+            navigate(`/colaboradores/detalhe/${result}`);
           }
         });
 
@@ -125,9 +125,9 @@ export const DetalheFuncionario = ({ id }: Props) => {
           if (result instanceof Error) {
             alert(result.message);
           } else {
-            if (1===2) {
-              navigate('/colaboradores');
-            }
+            showSnackbarMessage('Cadastro atualizado com sucesso!');
+            navigate('/colaboradores');
+
           }
         });
     }
@@ -177,7 +177,7 @@ export const DetalheFuncionario = ({ id }: Props) => {
           }}
         >
 
-          <Grid container direction='column' padding={2} spacing={2}>
+          <Grid container sx={{flexDirection:'column'}} padding={2} spacing={2}>
 
             {isLoading &&
               <Grid item>
@@ -225,12 +225,23 @@ export const DetalheFuncionario = ({ id }: Props) => {
 
             <Grid container item direction='row'>
               <Grid item xs={10} sm={8} md={6} lg={4} xl={3}>
-                <VTextField
+                <VSelect
                   disabled={isLoading}
                   fullWidth
+
                   label='Grupo'
                   name='grupo'
-                />
+                  control={methods.control}
+                >
+                  {
+                    options_grupo.map(option => (
+                      <MenuItem key={option.id} value={option.id}>
+                        {option.label}
+                      </MenuItem>
+                    ))
+                  }
+
+                </VSelect>
               </Grid>
             </Grid>
 
@@ -246,13 +257,13 @@ export const DetalheFuncionario = ({ id }: Props) => {
             </Grid>
             {id !== 'cadastrar' &&
               <Grid item >
-                
-                  <VSwitch
-                    disabled={isLoading}
-                    label='Ativo'
-                    name='ativo'
-                  />
-               
+
+                <VSwitch
+                  disabled={isLoading}
+                  label='Ativo'
+                  name='ativo'
+                />
+
               </Grid>
 
             }

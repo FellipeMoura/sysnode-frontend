@@ -11,6 +11,7 @@ import { ProdutosService } from '../../../api/services/ProdutosService';
 import { AutoCompleteCategory } from '../../../components/forms/AutoCompleteCategory';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { VSwitch } from '../../../components/forms/VSwitch';
+import { useSnackbar } from '../../../contexts/SnackBarProvider';
 
 
 
@@ -35,6 +36,7 @@ interface Props {
 }
 
 export const EditarProduto = ({ id }: Props) => {
+  const { showSnackbarMessage } = useSnackbar();
   const { save,  ...methods } = useVForm<IFormData>({
     resolver: yupResolver(formValidationSchema)
   });
@@ -74,9 +76,7 @@ export const EditarProduto = ({ id }: Props) => {
         if (result instanceof Error) {
           alert(result.message);
         } else {
-          if (1===2) {
-            navigate('/produtos');
-          }
+          showSnackbarMessage('Registro salvo com sucesso!');
         }
       });
 
@@ -125,7 +125,7 @@ export const EditarProduto = ({ id }: Props) => {
           }}
         >
 
-          <Grid container direction='column' padding={2} spacing={2}>
+          <Grid container sx={{flexDirection:'column'}} padding={2} spacing={2}>
 
             {isLoading &&
               <Grid item>
@@ -159,7 +159,7 @@ export const EditarProduto = ({ id }: Props) => {
             </Grid>
 
             <Grid container item direction='row'>
-              <Grid item xs={12} sm={10} md={8} lg={6} xl={5} >
+              <Grid item xs={10} sm={8} md={7} lg={6} xl={5} >
                 <VTextField
                   disabled={isLoading}
                   fullWidth

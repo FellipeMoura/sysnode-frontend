@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import {  LinearProgress, Paper, Grid } from '@mui/material';
+import { LinearProgress, Paper, Grid } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -11,6 +11,7 @@ import moment from 'moment';
 import { LancamentosService } from '../../../api/services/LancamentosService';
 import { LayoutComponentePagina } from '../../../layouts';
 import { FerramentasDeDetalhe } from '../../../components';
+import { useSnackbar } from '../../../contexts/SnackBarProvider';
 
 interface IFormData {
   id_funcionario?: number | null;
@@ -32,7 +33,8 @@ interface Props {
 }
 
 export const CadastrarVenda = ({ tipo }: Props) => {
-  const { save,  ...methods } = useVForm<IFormData>({
+  const { showSnackbarMessage } = useSnackbar();
+  const { save, ...methods } = useVForm<IFormData>({
     resolver: yupResolver(formValidationSchema),
   });
   const navigate = useNavigate();
@@ -60,11 +62,9 @@ export const CadastrarVenda = ({ tipo }: Props) => {
           if (result instanceof Error) {
             alert(result.message);
           } else {
-            if (1===2) {
-              navigate('/lancamentos');
-            } else {
-              navigate(`/lancamentos/detalhe/${result}`);
-            }
+            showSnackbarMessage('Venda cadastrada com sucesso!');
+            navigate(`/lancamentos/detalhe/${result}`);
+
           }
 
         });
@@ -85,7 +85,7 @@ export const CadastrarVenda = ({ tipo }: Props) => {
           aoClicarEmSalvar={() => save(handleSave)}
           //    aoClicarEmSalvarEFechar={() => saveAndClose(handleSave)}
           aoClicarEmVoltar={() => navigate('/lancamentos')}
-          // aoClicarEmApagar={() => }
+        // aoClicarEmApagar={() => }
         />
 
       }
@@ -101,7 +101,7 @@ export const CadastrarVenda = ({ tipo }: Props) => {
             gap: 1,
           }}
         >
-          <Grid container direction='column' padding={2} spacing={2}>
+          <Grid container sx={{flexDirection:'column'}} padding={2} spacing={2}>
             {isLoading && <Grid item><LinearProgress variant='indeterminate' /></Grid>}
             <Grid container item direction='row' spacing={2}>
               <Grid item xs={10} sm={7} md={5} lg={4} xl={3}>

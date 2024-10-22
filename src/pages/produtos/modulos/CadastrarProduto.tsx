@@ -10,6 +10,7 @@ import { LayoutComponentePagina } from '../../../layouts';
 import { ProdutosService } from '../../../api/services/ProdutosService';
 import { AutoCompleteCategory } from '../../../components/forms/AutoCompleteCategory';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { useSnackbar } from '../../../contexts/SnackBarProvider';
 
 interface IFormData {
     tipo: string;
@@ -26,7 +27,8 @@ const formValidationSchema = yup.object().shape({
 });
 
 export const CadastrarProduto: React.FC = () => {
-    const { save,  ...methods } = useVForm<IFormData>({
+    const { showSnackbarMessage } = useSnackbar();
+    const { save, ...methods } = useVForm<IFormData>({
         resolver: yupResolver(formValidationSchema)
     }); const { id = 'cadastrar' } = useParams<'id'>();
     const navigate = useNavigate();
@@ -51,11 +53,9 @@ export const CadastrarProduto: React.FC = () => {
             if (result instanceof Error) {
                 alert(result.message);
             } else {
-                if (1===2) {
-                    navigate('/produtos');
-                } else {
-                    navigate(`/produtos/detalhe/${result}`);
-                }
+                showSnackbarMessage('Produto cadastrado com sucesso!');
+                navigate(`/produtos/detalhe/${result}`);
+
             }
         });
 
@@ -85,7 +85,7 @@ export const CadastrarProduto: React.FC = () => {
                     }}
                 >
 
-                    <Grid container direction='column' padding={2} spacing={2}>
+                    <Grid container sx={{flexDirection:'column'}} padding={2} spacing={2}>
                         {isLoading && (
                             <Grid item>
                                 <LinearProgress variant='indeterminate' />

@@ -1,22 +1,18 @@
 import { useCallback, useEffect, useState } from 'react';
-import {
-  LinearProgress, Paper, Grid, TableBody, TableRow, TableCell, IconButton, Icon, TableFooter, Button,
-  Typography,
-  Snackbar,
-  Theme,
-  useMediaQuery,
-} from '@mui/material';
+import { LinearProgress, Paper, Grid, TableBody, TableRow, TableCell, IconButton, Icon, TableFooter, Button, Typography, Theme, useMediaQuery} from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { VForm, useVForm, VCash, VNumericFormat } from '../../../components/forms';
+import moment from 'moment';
+import * as yup from 'yup';
+
 import { ILancamentoConsulta, IVendaConsulta, LancamentosService } from '../../../api/services/LancamentosService';
+import { AutoCompleteProduto } from '../../../components/forms/AutoCompleteProduto';
+import { VForm, useVForm, VCash, VNumericFormat } from '../../../components/forms';
+import { useSnackbar } from '../../../contexts/SnackBarProvider';
 import { FerramentasDeDetalhe } from '../../../components';
 import { LayoutComponentePagina } from '../../../layouts';
 import { VTable } from '../../../components/grids/VTable';
-import moment from 'moment';
 import { toCash } from '../../../shared/functions';
-import { AutoCompleteProduto } from '../../../components/forms/AutoCompleteProduto';
 
 interface IFormData {
   id_vendas: number;
@@ -40,6 +36,7 @@ interface Props {
 
 
 export const DetalheLancamento = ({ id }: Props) => {
+  const { showSnackbarMessage } = useSnackbar();
   const { save, ...methods } = useVForm<Omit<IFormData, 'id_vendas' | 'tipo'>>({
     resolver: yupResolver(formValidationSchema),
   });
@@ -47,7 +44,6 @@ export const DetalheLancamento = ({ id }: Props) => {
   const [isLoading, setIsLoading] = useState(false);
   const [venda, setVenda] = useState<IVendaConsulta>();
   const [lancamentos, setLancamentos] = useState<ILancamentoConsulta[]>([]);
-  const [showSnackbar, setShowSnackbar] = useState<string | null>(null);
   const smDown = useMediaQuery((theme: Theme) => theme.breakpoints.down('sm'));
   
   const fetchVendaELancamentos = useCallback(async () => {
@@ -70,7 +66,7 @@ export const DetalheLancamento = ({ id }: Props) => {
       setVenda(vendaResponse);
       setLancamentos(lancamentosResponse.data);
     } catch (error) {
-      setShowSnackbar('Erro ao carregar dados.');
+      showSnackbarMessage('Erro ao carregar dados.');
       navigate('/lancamentos');
     } finally {
       setIsLoading(false);
@@ -93,7 +89,7 @@ export const DetalheLancamento = ({ id }: Props) => {
       fetchVendaELancamentos(); // Recarrega a lista
       methods.reset();
     } catch (error) {
-      setShowSnackbar('Erro ao salvar.');
+      showSnackbarMessage('Erro ao salvar.');
     } finally {
       setIsLoading(false);
     }
@@ -103,10 +99,10 @@ export const DetalheLancamento = ({ id }: Props) => {
     if (window.confirm('Realmente deseja apagar?')) {
       try {
         await LancamentosService.deleteById('lancamentos', id);
-        setShowSnackbar('Registro apagado com sucesso!');
+        showSnackbarMessage('Registro apagado com sucesso!');
         fetchVendaELancamentos();
       } catch (error) {
-        setShowSnackbar('Erro ao apagar.');
+        showSnackbarMessage('Erro ao apagar.');
       }
     }
   }, [fetchVendaELancamentos]);
@@ -125,10 +121,10 @@ export const DetalheLancamento = ({ id }: Props) => {
     if (window.confirm('Realmente deseja apagar?')) {
       try {
         await LancamentosService.deleteById('vendas', id);
-        setShowSnackbar('Registro apagado com sucesso!');
+        showSnackbarMessage('Registro apagado com sucesso!');
         navigate('/lancamentos');
       } catch (error) {
-        setShowSnackbar('Erro ao apagar.');
+        showSnackbarMessage('Erro ao apagar.');
       }
     }
   }, [fetchVendaELancamentos]);
@@ -146,14 +142,7 @@ export const DetalheLancamento = ({ id }: Props) => {
         />
       }
     >
-      {showSnackbar && (
-        <Snackbar
-          open={!!showSnackbar}
-          autoHideDuration={6000}
-          onClose={() => setShowSnackbar(null)}
-          message={showSnackbar}
-        />
-      )}
+
       <DetalheLancamentoHeader venda={venda} />
       <VForm methods={methods} onSubmit={onSubmit}>
         <Paper
@@ -165,7 +154,7 @@ export const DetalheLancamento = ({ id }: Props) => {
             gap: 1,
           }}
         >
-          <Grid container direction='column' padding={2} spacing={2}>
+          <Grid container sx={{flexDirection:'column'}} padding={2} spacing={2}>
             {isLoading && (
               <Grid item>
                 <LinearProgress variant='indeterminate' />
@@ -176,8 +165,10 @@ export const DetalheLancamento = ({ id }: Props) => {
               <Grid item>
                 <VTable overflow={'hidden'} titles={smDown ?
                   ['', 'Produto', 'Qnt', 'Valor']
-                  :
-                  ['', 'Produto', 'Itens', 'Valor', 'Valor Base', 'Tipo']}
+                  
+                  : venda?.id_cliente ?
+                  ['', 'Produto', 'Itens', 'Valor', 'Valor Base', 'Tipo']
+                  : ['', 'Produto', 'Itens', 'Valor', 'Tipo']}
                 >
                   <TableBody>
                     {lancamentos.map((lancamento, index) => (
@@ -191,7 +182,7 @@ export const DetalheLancamento = ({ id }: Props) => {
                         <TableCell>{lancamento.qnt}</TableCell>
                         <TableCell>{lancamento.valor}</TableCell>
                         {!smDown && <>
-                          <TableCell>{lancamento.valor_base}</TableCell>
+                         {!!venda?.id_cliente && <TableCell>{lancamento.valor_base}</TableCell>}
                           <TableCell>{lancamento.tipo_produto}</TableCell>
                         </>}
                       </TableRow>
@@ -312,13 +303,13 @@ export const DetalheLancamentoHeader = ({ venda }: IVendaConsulta | any) => {
             {toCash(venda.valor_itens)}
           </Typography>
         </Grid>
-
+{ !!venda?.id_cliente &&
         <Grid item xs={4.5} md={4}>
           <Typography variant='subtitle1'>Valor Base</Typography>
           <Typography variant='body2' color='textSecondary'>
             {toCash(venda.valor_base_itens)}
           </Typography>
-        </Grid>
+        </Grid> }
       </Grid>
     </Paper>
   );

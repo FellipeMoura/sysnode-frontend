@@ -1,23 +1,19 @@
 import { useCallback, useEffect, useState } from 'react';
-import {
-  LinearProgress, Paper, Grid, TableBody, TableRow, TableCell, IconButton, Icon, TableFooter, Button,
-  Typography,
-  Snackbar,
-  Theme,
-  useMediaQuery,
-} from '@mui/material';
+import { LinearProgress, Paper, Grid, TableBody, TableRow, TableCell, IconButton, Icon, TableFooter, Button, Typography, Theme, useMediaQuery} from '@mui/material';
+import { yupResolver } from '@hookform/resolvers/yup';
 import { useNavigate } from 'react-router-dom';
 import * as yup from 'yup';
-import { yupResolver } from '@hookform/resolvers/yup';
-import { VForm, useVForm, VCash, VNumericFormat } from '../../../components/forms';
+
+import { AutoCompleteMetodoPagamento } from '../../../components/forms/AutoCompleteMetodoPagamento';
+import { IVendaConsulta, LancamentosService } from '../../../api/services/LancamentosService';
 import { IPagamento, PagamentosService } from '../../../api/services/PagamentosService';
+import { VForm, useVForm, VCash, VNumericFormat } from '../../../components/forms';
+import { useSnackbar } from '../../../contexts/SnackBarProvider';
 import { FerramentasDeDetalhe } from '../../../components';
 import { LayoutComponentePagina } from '../../../layouts';
 import { VTable } from '../../../components/grids/VTable';
-import moment from 'moment';
+import { options_metodo } from '../../../shared/template';
 import { toCash } from '../../../shared/functions';
-import { AutoCompleteMetodoPagamento } from '../../../components/forms/AutoCompleteMetodoPagamento';
-import { IVendaConsulta, LancamentosService } from '../../../api/services/LancamentosService';
 
 interface IFormData {
   id_cliente?: number | null | undefined;
@@ -32,9 +28,7 @@ const formValidationSchema = yup.object().shape({
   metodo: yup.string().min(1, 'Nenhum método de pagamento selecionado').required(),
   valor: yup.number().min(0.01, 'O valor deve ser maior que zero').required(),
   parcelas: yup.number().required("Defina a quatidade de parcelas"),
-  id_cliente: yup.number().nullable().optional(),
-  id_fornecedor: yup.number().nullable().optional(),
-  id_vendas: yup.number().required(),
+
 });
 
 interface Props {
@@ -42,13 +36,13 @@ interface Props {
 }
 
 export const DetalhePagamento = ({ id }: Props) => {
-  const { save, ...methods } = useVForm<IFormData>({
+  const { showSnackbarMessage } = useSnackbar();
+  const { save, ...methods } = useVForm<Omit<IFormData, 'id_vendas' | 'id_cliente' | 'id_fornecedor'>>({
     resolver: yupResolver(formValidationSchema),
   });
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [pagamentos, setPagamentos] = useState<IPagamento[]>([]);
-  const [showSnackbar, setShowSnackbar] = useState<string | null>(null);
   const smDown = useMediaQuery((theme: Theme) => theme.breakpoints.down('sm'));
   const [venda, setVenda] = useState<IVendaConsulta>();
 
@@ -63,7 +57,7 @@ export const DetalhePagamento = ({ id }: Props) => {
 
       setPagamentos(response.data);
     } catch (error) {
-      setShowSnackbar('Erro ao carregar dados.');
+      showSnackbarMessage('Erro ao carregar dados.');
       navigate('/pagamentos');
     } finally {
       setIsLoading(false);
@@ -75,20 +69,20 @@ export const DetalhePagamento = ({ id }: Props) => {
     try {
       const [vendaResponse] = await Promise.all([
         LancamentosService.getVendaById(Number(id)),
-     
+
       ]);
 
       if (vendaResponse instanceof Error) {
         throw new Error('Erro ao carregar a venda.');
       }
 
-     
+
 
       // Atualiza os estados somente se não houver erros
       setVenda(vendaResponse);
-      
+
     } catch (error) {
-      setShowSnackbar('Erro ao carregar dados.');
+      showSnackbarMessage('Erro ao carregar dados.');
       navigate('/lancamentos');
     } finally {
       setIsLoading(false);
@@ -103,73 +97,62 @@ export const DetalhePagamento = ({ id }: Props) => {
     methods.setValue('parcelas', 1);
   }, []);
 
+
+
   const handleSave = useCallback(async (dados: IFormData) => {
+    console.log("Salvando dados: ", dados); // Debug
     setIsLoading(true);
     try {
       await PagamentosService.create(dados);
       fetchPagamentos(); // Recarrega a lista
+      fetchVenda();
       methods.reset();
     } catch (error) {
-      setShowSnackbar('Erro ao salvar.');
+      console.error("Erro ao salvar: ", error);
+      showSnackbarMessage('Erro ao salvar.');
     } finally {
       setIsLoading(false);
     }
   }, [fetchPagamentos, methods]);
 
+
   const handleDelete = useCallback(async (id: number) => {
     if (window.confirm('Realmente deseja apagar?')) {
       try {
         await PagamentosService.deleteById(id);
-        setShowSnackbar('Registro apagado com sucesso!');
+        showSnackbarMessage('Registro apagado com sucesso!');
         fetchPagamentos();
+        fetchVenda();
       } catch (error) {
-        setShowSnackbar('Erro ao apagar.');
+        showSnackbarMessage('Erro ao apagar.');
       }
     }
   }, [fetchPagamentos]);
 
-  const onSubmit = useCallback((dados: IFormData) => {
+  const onSubmit = useCallback((dados: Omit<IFormData, 'id_vendas' | 'id_cliente' | 'id_fornecedor'>) => {
+
     const dadosAtualizados = {
       ...dados,
       id_vendas: id,
+      valor: Number(dados.valor),
       id_cliente: venda?.id_cliente || null,
       id_fornecedor: venda?.id_fornecedor || null,
     };
-  
     handleSave(dadosAtualizados);
   }, [handleSave, id, venda]);
 
-
-  const isMetodoPagamentoSelecionado = methods.watch('metodo');
-
-  const metodos = [
-    { id: 'pix', label: 'Pix' },
-    { id: 'debito', label: 'Débito' },
-    { id: 'credito', label: 'Crédito' },
-    { id: 'dinheiro', label: 'Dinheiro' },
-    { id: 'boleto', label: 'Boleto' },
-  ]
   return (
     <LayoutComponentePagina
       barraDeFerramentas={
         <FerramentasDeDetalhe
-          textoBotaoNovo='Cadastrar'
-          mostrarBotaoNovo
-          mostrarBotaoApagar
-          aoClicarEmSalvar={() => save(onSubmit)}
-          aoClicarEmVoltar={() => navigate('/pagamentos')}
-          aoClicarEmNovo={() => navigate('/pagamentos/novo')}
+          mostrarBotaoNovo={false}
+          mostrarBotaoApagar={false}
+          mostrarBotaoSalvar={false}
+          aoClicarEmVoltar={() => navigate('/lancamentos')}
         />
+
       }
     >
-      {showSnackbar && (
-        <Snackbar
-          open={!!showSnackbar}
-          autoHideDuration={6000}
-          onClose={() => setShowSnackbar(null)}
-          message={showSnackbar}
-        />
-      )}
       <DetalhePagamentoHeader venda={venda} />
       <VForm methods={methods} onSubmit={onSubmit}>
         <Paper
@@ -181,7 +164,7 @@ export const DetalhePagamento = ({ id }: Props) => {
             gap: 1,
           }}
         >
-          <Grid container direction='column' padding={2} spacing={2}>
+          <Grid container sx={{flexDirection:'column'}} padding={2} spacing={2}>
             {isLoading && (
               <Grid item>
                 <LinearProgress variant='indeterminate' />
@@ -191,9 +174,9 @@ export const DetalhePagamento = ({ id }: Props) => {
             <Grid container item direction="column" spacing={2}>
               <Grid item>
                 <VTable overflow={'hidden'} titles={smDown ?
-                  ['', 'Método', 'Valor', 'Data']
+                  ['', 'Método', 'Valor', 'Parcelas']
                   :
-                  ['', 'Método de Pagamento', 'Valor', 'Data']}
+                  ['', 'Método de Pagamento', 'Valor', 'Parcelas']}
                 >
                   <TableBody>
                     {pagamentos.map((pagamento, index) => (
@@ -203,56 +186,61 @@ export const DetalhePagamento = ({ id }: Props) => {
                             <Icon>delete</Icon>
                           </IconButton>
                         </TableCell>
-                        <TableCell>{metodos.find((element)=> element.id === pagamento.metodo)?.label}</TableCell>
+                        <TableCell>{options_metodo.find((element) => element.id === pagamento.metodo)?.label}</TableCell>
                         <TableCell>{toCash(pagamento.valor)}</TableCell>
                         <TableCell>{pagamento.parcelas}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
                   <TableFooter>
-                    <TableRow>
-                      <TableCell colSpan={4}>
-                        <Grid container spacing={2} alignItems="center">
-                          <Grid item xs={9}>
-                            <AutoCompleteMetodoPagamento isExternalLoading={isLoading} />
-                          </Grid>
-                          {!!isMetodoPagamentoSelecionado && (
-                            <>
-                              <Grid item xs={3} sm={4}>
-                                <VCash
-                                  disabled={isLoading}
-                                  fullWidth
-                                  label='Valor'
-                                  name='valor'
-                                />
+                    {!venda?.pago &&
+                      <>
+                        <TableRow>
+                          <TableCell colSpan={4}>
+                            <Grid container spacing={2} alignItems="center">
+                              <Grid item xs={6} sm={4}>
+                                <AutoCompleteMetodoPagamento isExternalLoading={isLoading} />
                               </Grid>
 
-                              <Grid item xs={3} sm={4}>
-                                <VNumericFormat
-                                  disabled={isLoading}
-                                  fullWidth
-                                  min={1}
-                                  max={20}
-                                  label='Parcelas'
-                                  name='parcelas'
-                                />
-                              </Grid>
-            
-                              <Grid item >
-                                <Button
-                                  variant="contained"
-                                  color="primary"
-                                  onClick={() => save(onSubmit)}
-                                  disabled={isLoading}
-                                >
-                                  Inserir
-                                </Button>
-                              </Grid>
-                            </>
-                          )}
-                        </Grid>
-                      </TableCell>
-                    </TableRow>
+                              <>
+                                <Grid item xs={5} sm={3}>
+                                  <VCash
+                                    disabled={isLoading}
+                                    fullWidth
+                                    label='Valor'
+                                    name='valor'
+                                  />
+                                </Grid>
+
+                                <Grid item xs={4} sm={2}>
+                                  <VNumericFormat
+                                    disabled={isLoading || !(options_metodo.find((element) => element.id === methods.getValues('metodo'))?.isParcelas)}
+                                    fullWidth
+                                    min={1}
+                                    max={20}
+                                    isParcelas={!(options_metodo.find((element) => element.id === methods.getValues('metodo'))?.isParcelas)}
+                                    label='Parcelas'
+                                    name='parcelas'
+                                  />
+                                </Grid>
+
+                                <Grid item >
+                                  <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={() => save(onSubmit)}
+                                    disabled={isLoading}
+                                  >
+                                    Inserir
+                                  </Button>
+                                </Grid>
+                              </>
+
+                            </Grid>
+                          </TableCell>
+                        </TableRow>
+
+                      </>}
                     {isLoading && (
                       <TableRow>
                         <TableCell colSpan={4}>
@@ -272,7 +260,6 @@ export const DetalhePagamento = ({ id }: Props) => {
 };
 
 export const DetalhePagamentoHeader = ({ venda }: IVendaConsulta | any) => {
-  const formattedDate = moment(venda?.data).format('DD/MM/YYYY');
 
   return (
     !!venda &&
@@ -283,50 +270,30 @@ export const DetalhePagamentoHeader = ({ venda }: IVendaConsulta | any) => {
         m: 1,
       }}
     >
-      <Grid container spacing={1}>
-        <Grid item xs={4.5} md={4}>
-          <Typography variant='subtitle1'>
-            {venda.id_cliente ? 'Venda' : 'Compra'}
-          </Typography>
-          <Typography variant='body2' color='textSecondary'>
-            Data: {formattedDate}
-          </Typography>
-        </Grid>
-        <Grid item xs={7} md={4}>
-          <Typography variant='subtitle1'>
-            {venda.id_cliente ? 'Cliente' : 'Fornecedor'}
-          </Typography>
-          <Typography variant='body2' color='textSecondary'>
-            {venda.nome_agente}
-          </Typography>
-        </Grid>
-        {!!venda.nome_funcionario &&
-          <Grid item xs={4.5} md={4}>
-            <Typography variant='subtitle1'>Atendente</Typography>
-            <Typography variant='body2' color='textSecondary'>
-              {venda.nome_funcionario}
-            </Typography>
-          </Grid>
-        }
-        <Grid item xs={7} md={4}>
-          <Typography variant='subtitle1'>Quantidade de Itens</Typography>
-          <Typography variant='body2' color='textSecondary'>
-            {venda.qnt_itens}
-          </Typography>
-        </Grid>
-        <Grid item xs={4.5} md={4}>
+      <Grid container spacing={1}>       
+      <Grid item xs={4.5} md={4}>
           <Typography variant='subtitle1'>Valor Total</Typography>
           <Typography variant='body2' color='textSecondary'>
             {toCash(venda.valor_itens)}
           </Typography>
         </Grid>
+        {!!venda.pago ?
+          <Grid item xs={4.5} md={4}>
+            <Typography variant='subtitle1'>Valor Pendente</Typography>
+            <Typography variant='body2' color='green'>Pago</Typography>
 
-        <Grid item xs={4.5} md={4}>
-          <Typography variant='subtitle1'>Valor Base</Typography>
-          <Typography variant='body2' color='textSecondary'>
-            {toCash(venda.valor_base_itens)}
-          </Typography>
-        </Grid>
+          </Grid>
+          :
+
+          <Grid item xs={4.5} md={4}>
+            <Typography variant='subtitle1'>Valor Pendente</Typography>
+            <Typography variant='body2' color='textSecondary'>
+              {toCash(venda.valor_itens - (venda.valor_pago || 0))}
+            </Typography>
+          </Grid>
+
+        }
+         
       </Grid>
     </Paper>
   );

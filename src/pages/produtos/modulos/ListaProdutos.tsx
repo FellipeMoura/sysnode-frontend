@@ -84,14 +84,14 @@ export const ListaProdutos: React.FC = () => {
           <TableFooter>
             {isLoading && (
               <TableRow>
-                <TableCell colSpan={6}>
+                <TableCell colSpan={7}>
                   <LinearProgress variant='indeterminate' />
                 </TableCell>
               </TableRow>
             )}
             {(totalCount > 0 && totalCount > Environment.LIMITE_DE_LINHAS) && (
               <TableRow>
-                <TableCell colSpan={6}>
+                <TableCell colSpan={7}>
                   <Pagination
                     page={page}
                     count={Math.ceil(totalCount / Environment.LIMITE_DE_LINHAS)}
