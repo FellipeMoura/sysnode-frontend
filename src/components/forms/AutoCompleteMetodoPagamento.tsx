@@ -1,12 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Autocomplete, CircularProgress, TextField } from '@mui/material';
-import { useDebounce } from '../../shared/UseDebounce';
+import { useMemo } from 'react';
+import { Autocomplete, TextField } from '@mui/material';
 import { useController, useFormContext } from 'react-hook-form';
-
-type TAutoCompleteOption = {
-  id: string;
-  label: string;
-};
 
 interface IAutoCompleteMetodoPagamentoProps {
   isExternalLoading?: boolean;
@@ -21,16 +15,13 @@ export const AutoCompleteMetodoPagamento: React.FC<IAutoCompleteMetodoPagamentoP
     defaultValue: undefined,
   });
 
-  const [opcoes, setOpcoes] = useState<TAutoCompleteOption[]>([
+  const opcoes = [
     { id: 'pix', label: 'Pix' },
     { id: 'debito', label: 'Débito' },
     { id: 'credito', label: 'Crédito' },
     { id: 'dinheiro', label: 'Dinheiro' },
     { id: 'boleto', label: 'Boleto' },
-  ]);
-
-  const [isLoading, setIsLoading] = useState(false);
-  const [busca, setBusca] = useState('');
+  ];
 
   const autoCompleteSelectedOption = useMemo(() => {
     if (!value) return null;
@@ -48,8 +39,8 @@ export const AutoCompleteMetodoPagamento: React.FC<IAutoCompleteMetodoPagamentoP
       options={opcoes}
       disabled={isExternalLoading}
       value={autoCompleteSelectedOption}
-      onInputChange={(_, newValue) => setBusca(newValue)}
-      onChange={(_, newValue) => { onChange(newValue?.id || ''); setBusca(''); }}
+      
+      onChange={(_, newValue) => { onChange(newValue?.id || ''); }}
       renderInput={(params) => (
         <TextField
           {...params}
