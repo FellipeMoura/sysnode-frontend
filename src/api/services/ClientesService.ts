@@ -24,7 +24,8 @@ const getAll = async (page = 1, filter = ''): Promise<TClientesComTotalCount | E
     const { data, headers } = await Api.get(urlRelativa);
 
     if (data) {
-      
+
+  
       return {
         data,
         totalCount: Number(headers['x-total-count'] || Environment.LIMITE_DE_LINHAS),
@@ -34,7 +35,7 @@ const getAll = async (page = 1, filter = ''): Promise<TClientesComTotalCount | E
     return new Error('Erro ao listar os registros.');
   } catch (error) {
     console.error(error);
-   return autoLogout(error)
+    return autoLogout(error)
   }
 };
 
@@ -59,14 +60,14 @@ const create = async (dados: Omit<ICliente, 'id' | 'empresa' | 'usuario'>): Prom
     const { data } = await Api.post<ICliente>('/clientes', dados);
 
     if (data) {
-      
+
       return data.id;
     }
 
     return new Error('Erro ao criar o registro.');
   } catch (error) {
     console.error(error);
-   return autoLogout(error)
+    return autoLogout(error)
   }
 };
 
@@ -75,7 +76,7 @@ const updateById = async (id: number, dados: Omit<ICliente, 'id' | 'empresa' | '
     await Api.put(`/clientes/${id}`, dados);
   } catch (error) {
     console.error(error);
-   return autoLogout(error)
+    return autoLogout(error)
   }
 };
 
@@ -84,7 +85,7 @@ const deleteById = async (id: number): Promise<void | Error> => {
     await Api.delete(`/clientes/${id}`);
   } catch (error) {
     console.error(error);
-   return autoLogout(error)
+    return autoLogout(error)
   }
 };
 
